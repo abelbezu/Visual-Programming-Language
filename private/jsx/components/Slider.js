@@ -33,14 +33,16 @@ export default class extends React.Component{
     containerMouseUp(event){
         event.stopPropagation();
         this.dp.held = false;
-        this.dp.cX 
+        this.dp.cX = 0;
     }
 
     containerMouseMove(event){
         event.stopPropagation();
         if(this.dp.held){
-            var dx = this.dp.cX + (event.clientX -this.dp.sX);
-            $(event.currentTarget).children('circle').attr('transform', 'translate('+(dx - 4)+','+'0)')
+            var dx = (event.clientX - this.dp.sX);
+            let target = $(event.currentTarget);
+            let left = target.position().left;
+            $(event.currentTarget).children('circle').attr('transform', 'translate('+(event.clientX - 4 - parseInt(left))+','+'0)')
         }
     }
 

@@ -1,6 +1,6 @@
 body {
   padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  
 }
 
 a {
@@ -16,6 +16,13 @@ svg .node{
   cursor: move;
 }
 
+.btn{
+  width: 100%;
+}
+
+input {
+  width: 100%;
+}
 
 
 svg > rect.activeNode {
@@ -74,7 +81,15 @@ g circle.activeCircle{
   fill: green;
 }
 
+a {
+  color: #2980b9;
+  cursor: pointer;
+}
 
+a:hover {
+  color: #c0392b;
+  text-decoration: none;
+}
 
 
 

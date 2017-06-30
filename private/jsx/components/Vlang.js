@@ -1,14 +1,14 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import $ from 'jquery';
 
 import * as Action from '../store/actions.js';
-import $ from 'jquery';
-import NodeLogic from '../Logic/node.js';
-import Link from '../Logic/link.js';
+import * as consts  from '../store/consts.js';
+
 import Debugger from './Debugger.js'
 import Slider from './Slider.js';
 
-var LayerNode = NodeLogic.LayerNode;
+
 
 class VLANG extends React.Component{
   constructor(props){
@@ -60,7 +60,7 @@ class VLANG extends React.Component{
     this.handleMouseLeave= this.handleMouseLeave.bind(this);
     this.handleKeyDown   = this.handleKeyDown.bind(this);
     this.handleKeyUp     = this.handleKeyUp.bind(this);
-    this.createNodeObject= this.createNodeObject.bind(this);
+    
     this.moveLinkStartTo = this.moveLinkStartTo.bind(this);
     this.moveLinkEndTo   = this.moveLinkEndTo.bind(this);
     this.getLinkIndex    = this.getLinkIndex.bind(this);
@@ -70,12 +70,25 @@ class VLANG extends React.Component{
     this.linkExists      = this.linkExists.bind(this);
 
 
+    this.createNodeObject= this.createNodeObject.bind(this);
+    this.AdditionNode     = this.AdditionNode.bind(this);
+    this.MultiplicationNode     = this.MultiplicationNode.bind(this);
+    this.AndNode     = this.AndNode.bind(this);
+    this.OrNode     = this.OrNode.bind(this);
+    this.NotNode     = this.NotNode.bind(this);
+
     // this is just for debugging ...
     this.addNode         = this.addNode.bind(this);
-    this.addLink         = this.addLink.bind(this);
     this.removeLink      = this.removeLink.bind(this);
     this.printMaps       = this.printMaps.bind(this);
     this.displayMouseInfo= this.displayMouseInfo.bind(this);
+    this.addAdditionNode = this.addAdditionNode.bind(this);
+    this.addMultiplicationNode = this.addMultiplicationNode.bind(this);
+    this.addNotNode      = this.addNotNode.bind(this);
+    this.addOrNode       = this.addOrNode.bind(this);
+    this.addAndNode      = this.addAndNode.bind(this);
+    this.addLayerNode    = this.addLayerNode.bind(this);
+
 
     
     this.printMaps();
@@ -441,6 +454,34 @@ class VLANG extends React.Component{
            onMouseDown  = {this.handleMouseDown}
            transform = {`translate(${node.translate.x},${node.translate.y})`}
         >
+        {
+           this.decideNodeType(node.type, p)
+        }
+        </g>
+      );
+  }
+
+  decideNodeType(type, p){
+    switch(type){
+        case consts.LAYER_NODE:
+            return  this.LayerNode(p);
+        case consts.MULTIPLICATION_NODE:
+            return  this.MultiplicationNode(p);
+        case consts.AND_NODE:
+            return  this.AndNode(p);
+        case consts.OR_NODE:
+            return  this.OrNode(p);
+        case consts.NOT_NODE:
+            return  this.NotNode(p);
+        default:
+            return  this.AdditionNode(p);
+    }
+  };
+
+
+  AdditionNode(p){
+      return(
+       <g>
             <rect className = {"nodeMain"} width= {this.width} height ={this.height} 
             x = {p.x} y = {p.y} ></rect>
             <rect className = {this.style.niClassName} width= {this.style.niw} height = {this.style.nih} x ={p.x} y ={p.y + this.style.nito}></rect>
@@ -449,17 +490,122 @@ class VLANG extends React.Component{
             <text className = {"nodeInputLabel"} x = {p.x + this.style.tltlo} y = {p.y + this.style.tltto} fontSize={"15"}>A</text>
             <text className = {"nodeInputLabel"} x = {p.x + this.style.tltlo} y = {p.y + this.style.tltto + 25} fontSize={"15"}>B</text>
             <text className = {"nodeInputLabel"} x = {p.x + this.style.tltlo + this.width - 20} y = {p.y + this.style.tltto} fontSize={"15"}>O</text>
-            <text className = {"nodeText"} x = {p.x + 30} y = {p.y + 15} fontSize={"10"}>              
-                    Lorem ipsum dolor sit  
+            <text className = {"nodeText"} x = {p.x + 80} y = {p.y + 25} fontSize={"20"}>              
+                    ADD
             </text>
              <text className = {"nodeText"} x = {p.x + 30} y = {p.y + 30} fontSize={"10"}>                
-                    consectetur adipiscing 
+                    
             </text>
             <Slider position={p}/>
-            
         </g>
-      );
+        );
   }
+
+  MultiplicationNode(p){
+      return(
+       <g>
+            <rect className = {"nodeMain"} width= {this.width} height ={this.height} 
+            x = {p.x} y = {p.y} ></rect>
+            <rect className = {this.style.niClassName} width= {this.style.niw} height = {this.style.nih} x ={p.x} y ={p.y + this.style.nito}></rect>
+            <rect className = {this.style.niClassName} width= {this.style.niw} height = {this.style.nih} x ={p.x} y ={p.y + this.style.nibo}></rect>
+            <rect className = {this.style.niClassName} width= {this.style.niw} height = {this.style.nih} x = {p.x + this.width - 20} y ={p.y + this.style.nito}></rect>
+            <text className = {"nodeInputLabel"} x = {p.x + this.style.tltlo} y = {p.y + this.style.tltto} fontSize={"15"}>A</text>
+            <text className = {"nodeInputLabel"} x = {p.x + this.style.tltlo} y = {p.y + this.style.tltto + 25} fontSize={"15"}>B</text>
+            <text className = {"nodeInputLabel"} x = {p.x + this.style.tltlo + this.width - 20} y = {p.y + this.style.tltto} fontSize={"15"}>O</text>
+            <text className = {"nodeText"} x = {p.x + 50} y = {p.y + 25} fontSize={"20"}>              
+                    MUTLTIPLY
+            </text>
+             <text className = {"nodeText"} x = {p.x + 30} y = {p.y + 30} fontSize={"10"}>                
+                    
+            </text>
+            <Slider position={p}/>
+        </g>
+        );
+  }
+  AndNode(p){
+      return(
+       <g>
+            <rect className = {"nodeMain"} width= {this.width} height ={this.height} 
+            x = {p.x} y = {p.y} ></rect>
+            <rect className = {this.style.niClassName} width= {this.style.niw} height = {this.style.nih} x ={p.x} y ={p.y + this.style.nito}></rect>
+            <rect className = {this.style.niClassName} width= {this.style.niw} height = {this.style.nih} x ={p.x} y ={p.y + this.style.nibo}></rect>
+            <rect className = {this.style.niClassName} width= {this.style.niw} height = {this.style.nih} x = {p.x + this.width - 20} y ={p.y + this.style.nito}></rect>
+            <text className = {"nodeInputLabel"} x = {p.x + this.style.tltlo} y = {p.y + this.style.tltto} fontSize={"15"}>A</text>
+            <text className = {"nodeInputLabel"} x = {p.x + this.style.tltlo} y = {p.y + this.style.tltto + 25} fontSize={"15"}>B</text>
+            <text className = {"nodeInputLabel"} x = {p.x + this.style.tltlo + this.width - 20} y = {p.y + this.style.tltto} fontSize={"15"}>O</text>
+            <text className = {"nodeText"} x = {p.x + 80} y = {p.y + 25} fontSize={"20"}>              
+                    AND
+            </text>
+             <text className = {"nodeText"} x = {p.x + 30} y = {p.y + 30} fontSize={"10"}>                
+                    
+            </text>
+            <Slider position={p}/>
+        </g>
+        );
+  }
+
+  OrNode(p){
+     return(
+       <g>
+            <rect className = {"nodeMain"} width= {this.width} height ={this.height} 
+            x = {p.x} y = {p.y} ></rect>
+            <rect className = {this.style.niClassName} width= {this.style.niw} height = {this.style.nih} x ={p.x} y ={p.y + this.style.nito}></rect>
+            <rect className = {this.style.niClassName} width= {this.style.niw} height = {this.style.nih} x ={p.x} y ={p.y + this.style.nibo}></rect>
+            <rect className = {this.style.niClassName} width= {this.style.niw} height = {this.style.nih} x = {p.x + this.width - 20} y ={p.y + this.style.nito}></rect>
+            <text className = {"nodeInputLabel"} x = {p.x + this.style.tltlo} y = {p.y + this.style.tltto} fontSize={"15"}>A</text>
+            <text className = {"nodeInputLabel"} x = {p.x + this.style.tltlo} y = {p.y + this.style.tltto + 25} fontSize={"15"}>B</text>
+            <text className = {"nodeInputLabel"} x = {p.x + this.style.tltlo + this.width - 20} y = {p.y + this.style.tltto} fontSize={"15"}>O</text>
+            <text className = {"nodeText"} x = {p.x + 85} y = {p.y + 25} fontSize={"20"}>              
+                    OR
+            </text>
+            <Slider position={p}/>
+        </g>
+    ); 
+  }
+
+  NotNode(p){
+     return(
+       <g>
+            <rect className = {"nodeMain"} width= {this.width} height ={this.height} 
+            x = {p.x} y = {p.y} ></rect>
+            <rect className = {this.style.niClassName} width= {this.style.niw} height = {this.style.nih} x ={p.x} y ={p.y + this.style.nito}></rect>
+            
+            <rect className = {this.style.niClassName} width= {this.style.niw} height = {this.style.nih} x = {p.x + this.width - 20} y ={p.y + this.style.nito}></rect>
+            <text className = {"nodeInputLabel"} x = {p.x + this.style.tltlo} y = {p.y + this.style.tltto} fontSize={"15"}>i</text>
+           
+            <text className = {"nodeInputLabel"} x = {p.x + this.style.tltlo + this.width - 20} y = {p.y + this.style.tltto} fontSize={"15"}>O</text>
+            <text className = {"nodeText"} x = {p.x + 80} y = {p.y + 25} fontSize={"20"}>              
+                    NOT
+            </text>
+             <text className = {"nodeText"} x = {p.x + 30} y = {p.y + 30} fontSize={"10"}>                
+                    
+            </text>
+            <Slider position={p}/>
+        </g>
+    ); 
+  }
+
+ LayerNode(p){
+     return(
+       <g>
+            <rect className = {"nodeMain"} width= {this.width} height ={this.height} 
+            x = {p.x} y = {p.y} ></rect>        
+            <rect className = {this.style.niClassName} width= {this.style.niw} height = {this.style.nih} x = {p.x + this.width - 20} y ={p.y + this.style.nito}></rect>         
+            <text className = {"nodeInputLabel"} x = {p.x + this.style.tltlo + this.width - 20} y = {p.y + this.style.tltto} fontSize={"15"}>O</text>
+            <text className = {"nodeText"} x = {p.x + 30} y = {p.y + 15} fontSize={"10"}>              
+                    Lorem ipsum dolor sit
+            </text>
+             <text className = {"nodeText"} x = {p.x + 30} y = {p.y + 30} fontSize={"10"}>                
+                    consectetur adipiscing
+            </text>
+            <Slider position={p}/>
+        </g>
+    ); 
+  }
+  
+  
+  
+
 
   createLinkObject(link, key){
     if(link.type === 'BOTTOM'){
@@ -513,12 +659,27 @@ class VLANG extends React.Component{
       }
   }
 
-  addNode(){
-      Action.vlangAddNode({ ref: "node_1", position: this.getRandomPosition()});
+  addNode(nodeType){
+    Action.vlangAddNode({ ref: "node_" + this.props.nodes.length + 1, type: nodeType,  position: this.getRandomPosition(), translate: {x: 0, y: 0}});
   }
 
-  addLink(){
-      Action.vlangAddLink({ ref: "link_1", source: this.props.nodes[0].position, target: this.props.nodes[1].position});
+  addAdditionNode(){
+    this.addNode(consts.ADDITION_NODE);
+  }
+  addMultiplicationNode(){
+    this.addNode(consts.MULTIPLICATION_NODE);
+  }
+  addOrNode(){
+    this.addNode(consts.OR_NODE);
+  }
+  addAndNode(){
+    this.addNode(consts.AND_NODE);
+  }
+  addNotNode(){
+    this.addNode(consts.NOT_NODE);
+  }
+  addLayerNode(){
+    this.addNode(consts.LAYER_NODE);
   }
 
   removeNode(){
@@ -552,38 +713,42 @@ class VLANG extends React.Component{
 
   render(){
     return (  
-        <div className="container">
+        <div className="row">
+                
                 <div className="col-md-2">
                    <Debugger />
-                   <button
-                    onClick = {this.addNode}>
-                       AddNode
-                    </button>
-                    <br></br>
-                    <br></br>
-                    <button
-                    onClick = {this.addLink}>
-                       AddLink
-                    </button>
-                    <br></br>
-                    <br></br>
-                     <button
-                    onClick = {this.removeLink}>
-                       RemoveLink
-                    </button>
-                    <br></br>
-                    <br></br>
-                    <input id={"moveX"}/>
-                    <input id={"moveY"}/>
-                     <button
-                    onClick = {this.removeNode}>
-                       RemoveNode
-                    </button>
+                   <h3> Node Type </h3>
+                   <a onClick = {this.addAdditionNode}>
+                       Addition Node
+                   </a>
+                   <br></br>
+                   <a onClick = {this.addMultiplicationNode}>
+                       Multication Node
+                   </a>
+                   <br></br>
+                   <a onClick = {this.addAndNode}>
+                       And Node
+                   </a>
+                   <br></br>
+                   <a onClick = {this.addOrNode}>
+                       Or Node
+                   </a>
+                   <br></br>
+                   <a onClick = {this.addNotNode}>
+                       Not Node
+                   </a>
+                   <br></br>
+                   <a onClick = {this.addLayerNode}>
+                       Layer Node
+                   </a>
+
+
+
                 </div>
                 <div className="col-md-10">
                     <svg ref ={"mainSvgElement"} width="100%" height={'800px'} xmlns="http://www.w3.org/2000/svg">
                         {this.props.nodes.map((node, index) => {
-                            return this.createNodeObject(node, index);
+                            return this.createNodeObject(node, index);  
                         })}
                         {this.props.links.map((link, index) => {
                             return this.createLinkObject(link, index);

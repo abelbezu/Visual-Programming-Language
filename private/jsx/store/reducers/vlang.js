@@ -2,11 +2,11 @@ import * as consts from '../consts';
 import * as Action from '../actions';
 
 
-let node1 = { ref: "node_1", position: {x:100, y:100}, translate: {x: 0, y: 0}};
-let node2 = { ref: "node_2", position: {x:400, y:50}, translate: {x: 0, y: 0}};
+let node1 = { ref: "node_1", type: consts.LAYER_NODE, position: {x:100, y:100}, translate: {x: 0, y: 0}};
+let node2 = { ref: "node_2", type: consts.MULTIPLICATION_NODE, position: {x:400, y:50}, translate: {x: 0, y: 0}};
 
-let node3 = { ref: "node_3", position: {x:400, y:200},translate: {x: 0, y: 0}};
-let node4 = { ref: "node_4", position: {x:400, y:350}, translate: {x: 0, y: 0}};
+let node3 = { ref: "node_3", type: consts.OR_NODE, position: {x:400, y:200},translate: {x: 0, y: 0}};
+let node4 = { ref: "node_4", type: consts.NOT_NODE, position: {x:400, y:350}, translate: {x: 0, y: 0}};
 
 // get adjusted position
 const pos = (node) => (
@@ -21,7 +21,7 @@ const pos = (node) => (
 
 let link1  = { ref: "link_1", sourceNode: node1, targetNode: node2, source: pos(node1), target: pos(node2), type: "TOP"}; 
 let link2  = { ref: "link_2", sourceNode: node1, targetNode: node3, source: pos(node1), target: pos(node3), type: "TOP"}; 
-let link3  = { ref: "link_3", sourceNode: node1, targetNode: node4, source: pos(node1), target: pos(node4), type: "BOTTOM"}; 
+let link3  = { ref: "link_3", sourceNode: node1, targetNode: node4, source: pos(node1), target: pos(node4), type: "TOP"}; 
 
 const initialState = {
     nodes: [node1, node2, node3, node4],
@@ -78,7 +78,7 @@ export default (state=initialState, action) => {
                 };
         case consts.VLANG_UPDATE_NODE_POSITION:
             let oldNode = state.nodes[action.index];
-            let newNode = { ref: oldNode.ref, position: oldNode.position, translate: action.position };
+            let newNode = { ref: oldNode.ref, type: oldNode.type, position: oldNode.position, translate: action.position };
 
             return  {
                  nodes: [
