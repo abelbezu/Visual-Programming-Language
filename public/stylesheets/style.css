@@ -36,9 +36,16 @@ svg > path.tempLink {
 }
 
 svg > path.link {
-  stroke : #5a5a5a;
+  stroke : #717171;
   stroke-width: 2px;
   fill : transparent;
+
+}
+
+svg > path.tempLink {
+  stroke : #27ae60;
+  stroke-width: 2px;
+
 
 }
 

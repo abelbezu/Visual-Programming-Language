@@ -7,6 +7,7 @@ import * as consts  from '../store/consts.js';
 
 import Debugger from './Debugger.js'
 import Slider from './Slider.js';
+import { DropdownButton, MenuItem } from 'react-bootstrap';
 
 
 
@@ -67,7 +68,7 @@ class VLANG extends React.Component{
     this.windowMouseDown = this.windowMouseDown.bind(this);
     this.windowMouseUp   = this.windowMouseUp.bind(this);
     this.getCloseNode    = this.getCloseNode.bind(this);
-    this.linkExists      = this.linkExists.bind(this);
+    this.isValidLink      = this.isValidLink.bind(this);
 
 
     this.createNodeObject= this.createNodeObject.bind(this);
@@ -122,12 +123,14 @@ class VLANG extends React.Component{
   } 
 
   componentDidUpdate(nextProps){
-    console.log('props changed ...')
     this.linksMap = this.refToElement(this.props.links);
     this.nodesMap = this.refToElement(this.props.nodes);
     this.nodeToLink = this.populateNodeToLink(this.props);
     this.linkToNode = this.populateLinkToNode(this.props);
     this.linksList  = this.populateLinksList(this.props);
+
+    console.log("Number of Nodes", Object.keys(this.nodesMap).length);
+    console.log("Number of Links", Object.keys(this.linksMap).length);
     
   }
 
@@ -138,6 +141,8 @@ class VLANG extends React.Component{
     console.log("Node To Link: ", this.nodeToLink);
     console.log("Link To Node: ", this.linkToNode);
     console.log("Links List: ", this.linksList);
+    console.log("Number of Nodes", Object.keys(this.nodesMap).length);
+    console.log("Number of Links", Object.keys(this.linksMap).length);
   }
 
   refToElement(elements){
@@ -184,12 +189,21 @@ class VLANG extends React.Component{
     return links;
   }
 
-  linkExists(source, target, type){
+  isValidLink(link){
+      let source = link.sourceNode;
+      let target = link.targetNode;
+      let type   = link.type; 
       let linksListRep = source.ref + "_" + target.ref + "_" + type;
-      if(this.linksList[linksListRep]){
-          return true;
+      if(target.type === consts.LAYER_NODE){
+          return false;
       }
-      return false;
+      if(this.linksList[linksListRep]){
+          return false;
+      }
+      if(type === "BOTTOM" && (target.type === consts.NOT_NODE)){
+          return false;
+      }
+      return true;
   }
   windowMouseDown(event){
       this.dp.mouseHeld = true;
@@ -214,7 +228,6 @@ class VLANG extends React.Component{
             let closeEnoughNode = this.getCloseNode(mouse)[0];
             
             if(!(closeEnoughNode == null)){
-                if(!this.linkExists(this.nodesMap[this.dp.nodeForConst], closeEnoughNode.node, closeEnoughNode.type)){
                     let newLink = {
                         ref : "link_" + this.props.links.length,
                         sourceNode: this.nodesMap[this.dp.nodeForConst],
@@ -224,6 +237,7 @@ class VLANG extends React.Component{
                         type : closeEnoughNode.type,
 
                     }
+                if(this.isValidLink(newLink)){
                     console.log("created new Link");
                     Action.vlangAddLink(newLink);
                 }
@@ -442,24 +456,6 @@ class VLANG extends React.Component{
 
 
 
-  createNodeObject(node, key){
-      let p = node.position;
-      return(
-        <g className = {"node"}
-           id = {node.ref}
-           key = {key}
-           onMouseOver  = {this.handleMouseOver}
-           onMouseLeave = {this.handleMouseLeave}
-           onMouseUp    = {this.handleMouseUp}
-           onMouseDown  = {this.handleMouseDown}
-           transform = {`translate(${node.translate.x},${node.translate.y})`}
-        >
-        {
-           this.decideNodeType(node.type, p)
-        }
-        </g>
-      );
-  }
 
   decideNodeType(type, p){
     switch(type){
@@ -478,6 +474,99 @@ class VLANG extends React.Component{
     }
   };
 
+
+
+  getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+  }
+
+  NoLinkFoundException()
+  { 
+      return "No link found";
+  }
+
+  getRandomPosition(){
+      return {
+          x: this.getRandomInt(0, 700),
+          y: this.getRandomInt(0, 500)
+        
+      }
+  }
+  topIncomingLinkPosition(position){
+      return {
+          x: position.x, 
+          y: position.y + 15,
+      }
+  }
+
+  bottomIncomingLinkPosition(position){
+      return {
+          x: position.x, 
+          y: position.y + 40,
+      }
+  }
+
+  getOutgoingLinkPosition(position){
+      return {
+          x: position.x + this.width,
+          y: position.y + 15
+      }
+  }
+
+  addNode(nodeType){
+    Action.vlangAddNode({ ref: "node_" + this.props.nodes.length + 1, type: nodeType,  position: this.getRandomPosition(), translate: {x: 0, y: 0}});
+  }
+
+  addAdditionNode(){
+    this.addNode(consts.ADDITION_NODE);
+  }
+  addMultiplicationNode(){
+    this.addNode(consts.MULTIPLICATION_NODE);
+  }
+  addOrNode(){
+    this.addNode(consts.OR_NODE);
+  }
+  addAndNode(){
+    this.addNode(consts.AND_NODE);
+  }
+  addNotNode(){
+    this.addNode(consts.NOT_NODE);
+  }
+  addLayerNode(){
+    this.addNode(consts.LAYER_NODE);
+  }
+
+  removeNode(){
+      let x = parseInt($('#moveX').val());
+      let y = parseInt($('#moveY').val());
+      let position = {x: x, y: y};
+      Action.vlangMoveNode(0, position);
+  }
+  removeLink(){
+      Action.vlangRemoveLink(this.getLinkIndex(this.props.links, 'link_1'));
+  }
+
+
+  createNodeObject(node, key){
+      let p = node.position;
+      return(
+        <g className = {"node"}
+           id = {node.ref}
+           key = {key}
+           onMouseOver  = {this.handleMouseOver}
+           onMouseLeave = {this.handleMouseLeave}
+           onMouseUp    = {this.handleMouseUp}
+           onMouseDown  = {this.handleMouseDown}
+           transform = {`translate(${node.translate.x},${node.translate.y})`}
+        >
+        {
+           this.decideNodeType(node.type, p)
+        }
+        </g>
+      );
+  }
 
   AdditionNode(p){
       return(
@@ -513,7 +602,7 @@ class VLANG extends React.Component{
             <text className = {"nodeInputLabel"} x = {p.x + this.style.tltlo} y = {p.y + this.style.tltto + 25} fontSize={"15"}>B</text>
             <text className = {"nodeInputLabel"} x = {p.x + this.style.tltlo + this.width - 20} y = {p.y + this.style.tltto} fontSize={"15"}>O</text>
             <text className = {"nodeText"} x = {p.x + 50} y = {p.y + 25} fontSize={"20"}>              
-                    MUTLTIPLY
+                    MULTIPLY
             </text>
              <text className = {"nodeText"} x = {p.x + 30} y = {p.y + 30} fontSize={"10"}>                
                     
@@ -610,86 +699,28 @@ class VLANG extends React.Component{
   createLinkObject(link, key){
     if(link.type === 'BOTTOM'){
         return (
-            <path ref={link.ref} key = {key} className={"link"} d={this.diagonal(this.getOutgoingLinkPosition(link.source), this.bottomIncomingLinkPosition(link.target))}></path>
+            <path markerEnd="url(#Triangle)" ref={link.ref} key = {key} className={"link"} d={this.diagonal(this.getOutgoingLinkPosition(link.source), this.bottomIncomingLinkPosition(link.target))}></path>
         );
     }
     else{
          return (
-            <path ref={link.ref} key = {key} className={"link"} d={this.diagonal(this.getOutgoingLinkPosition(link.source), this.topIncomingLinkPosition(link.target))}></path>
+            <path markerEnd="url(#Triangle)" ref={link.ref} key = {key} className={"link"} d={this.diagonal(this.getOutgoingLinkPosition(link.source), this.topIncomingLinkPosition(link.target))}></path>
         );
     }
   }
 
-  getRandomInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
-  }
 
-  NoLinkFoundException()
-  { 
-      return "No link found";
-  }
 
-  getRandomPosition(){
-      return {
-          x: this.getRandomInt(0, 700),
-          y: this.getRandomInt(0, 500)
-        
-      }
-  }
-  topIncomingLinkPosition(position){
-      return {
-          x: position.x, 
-          y: position.y + 15,
-      }
-  }
 
-  bottomIncomingLinkPosition(position){
-      return {
-          x: position.x, 
-          y: position.y + 40,
-      }
-  }
-
-  getOutgoingLinkPosition(position){
-      return {
-          x: position.x + this.width,
-          y: position.y + 15
-      }
-  }
-
-  addNode(nodeType){
-    Action.vlangAddNode({ ref: "node_" + this.props.nodes.length + 1, type: nodeType,  position: this.getRandomPosition(), translate: {x: 0, y: 0}});
-  }
-
-  addAdditionNode(){
-    this.addNode(consts.ADDITION_NODE);
-  }
-  addMultiplicationNode(){
-    this.addNode(consts.MULTIPLICATION_NODE);
-  }
-  addOrNode(){
-    this.addNode(consts.OR_NODE);
-  }
-  addAndNode(){
-    this.addNode(consts.AND_NODE);
-  }
-  addNotNode(){
-    this.addNode(consts.NOT_NODE);
-  }
-  addLayerNode(){
-    this.addNode(consts.LAYER_NODE);
-  }
-
-  removeNode(){
-      let x = parseInt($('#moveX').val());
-      let y = parseInt($('#moveY').val());
-      let position = {x: x, y: y};
-      Action.vlangMoveNode(0, position);
-  }
-  removeLink(){
-      Action.vlangRemoveLink(this.getLinkIndex(this.props.links, 'link_1'));
+  linkMarker(){
+    return(
+      <defs>
+        <marker id="Triangle" viewBox="0 0 10 10" refX="10" refY="5"
+            markerWidth="3" markerHeight="3" orient="auto">
+          <path d="M 0 0 L 0 10 L 10 10 L 10 0 z" />
+        </marker>
+      </defs>
+    );
   }
 
 
@@ -715,38 +746,25 @@ class VLANG extends React.Component{
     return (  
         <div className="row">
                 
+                
+
                 <div className="col-md-2">
+                   
                    <Debugger />
-                   <h3> Node Type </h3>
-                   <a onClick = {this.addAdditionNode}>
-                       Addition Node
-                   </a>
                    <br></br>
-                   <a onClick = {this.addMultiplicationNode}>
-                       Multication Node
-                   </a>
-                   <br></br>
-                   <a onClick = {this.addAndNode}>
-                       And Node
-                   </a>
-                   <br></br>
-                   <a onClick = {this.addOrNode}>
-                       Or Node
-                   </a>
-                   <br></br>
-                   <a onClick = {this.addNotNode}>
-                       Not Node
-                   </a>
-                   <br></br>
-                   <a onClick = {this.addLayerNode}>
-                       Layer Node
-                   </a>
-
-
-
+                   <DropdownButton title={"Button"}  id={`dropdown-basic-1`}>
+                    <MenuItem onClick = {this.addAdditionNode}>Addition Node</MenuItem>
+                    <MenuItem onClick = {this.addMultiplicationNode}>Multication Node</MenuItem>
+                    <MenuItem onClick = {this.addAndNode}>And Node</MenuItem>
+                    <MenuItem onClick = {this.addOrNode}>Or Node</MenuItem>
+                    <MenuItem onClick = {this.addNotNode}>Not Node</MenuItem>
+                    <MenuItem onClick = {this.addLayerNode}>Layer Node</MenuItem>
+                   </DropdownButton>
+                  
                 </div>
                 <div className="col-md-10">
                     <svg ref ={"mainSvgElement"} width="100%" height={'800px'} xmlns="http://www.w3.org/2000/svg">
+                        {this.linkMarker()}
                         {this.props.nodes.map((node, index) => {
                             return this.createNodeObject(node, index);  
                         })}

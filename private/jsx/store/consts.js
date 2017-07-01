@@ -8,6 +8,6 @@ export const VLANG_UPDATE_NODE_POSITION = "VLANG_UPDATE_NODE_POSITION";
 export const LAYER_NODE = "LAYER_NODE";
 export const ADDITION_NODE = "ADD_NODE";
 export const MULTIPLICATION_NODE = "MULTIPLICATION_NODE";
-export const AND_NODE = "ADD_NODE";
+export const AND_NODE = "AND_NODE";
 export const OR_NODE = "OR_NODE";
 export const NOT_NODE = "NOT_NODE";
